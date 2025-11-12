@@ -7,9 +7,14 @@ from. models import Movie
 
 @api_view(['GET'])
 def movie_list_api_view(request):
-    movies = Movie.objects.all()
+    # step 1: Collect films from DB (QuerySet)
+    movies = (Movie.objects.select_related('director')
+              .prefetch_related('genre', 'reviews').all())
+
+    #step 2: Reformat (Serialize) to List of dictionaries
     data = MovieListSerializer(movies, many=True).data
 
+    #step 3: Return Response
     return Response(
         data=data,
         status=status.HTTP_200_OK
