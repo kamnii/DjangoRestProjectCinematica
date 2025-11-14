@@ -69,13 +69,13 @@ def movie_detail_api_view(request, id):
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
-            movie.title = request.data.get('title')
-            movie.text = request.data.get('text')
-            movie.is_active = request.data.get('is_active')
-            movie.realease_year = request.data.get('realease_year')
-            movie.rating_imdb = request.data.get('rating_imdb')
-            movie.director_id = request.data.get('director_id')
-            movie.genres.set(request.data.get('genres'))
+            movie.title = serializer.validated_data.get('title')
+            movie.text = serializer.validated_data.get('text')
+            movie.is_active = serializer.validated_data.get('is_active')
+            movie.realease_year = serializer.validated_data.get('realease_year')
+            movie.rating_imdb = serializer.validated_data.get('rating_imdb')
+            movie.director_id = serializer.validated_data.get('director_id')
+            movie.genres.set(serializer.validated_data.get('genres'))
             movie.save()
             
         return Response(data=MovieDetailSerializer(movie).data,
