@@ -11,7 +11,7 @@ from. models import Movie
 def movie_list_api_view(request):
     # step 1: Collect films from DB (QuerySet)
     movies = (Movie.objects.select_related('director')
-              .prefetch_related('genre', 'reviews').all())
+              .prefetch_related('genres', 'reviews').all())
 
     #step 2: Reformat (Serialize) to List of dictionaries
     if request.method == "GET":
@@ -51,15 +51,38 @@ def movie_list_api_view(request):
                         status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def movie_detail_api_view(request, id):
-
     try:
         movie = Movie.objects.get(id=id)
     except Movie.DoesNotExist:
         return Response(data={'error': 'Movie Not Found!'},
                         status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        data = MovieDetailSerializer(movie).data
+        return Response(data=data,
+                        status=status.HTTP_200_OK)
     
-    data = MovieDetailSerializer(movie).data
-    return Response(data=data,
-                    status=status.HTTP_200_OK)
+    elif request.method == "PUT":
+        serializer = MoviewValidateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            movie.title = request.data.get('title')
+            movie.text = request.data.get('text')
+            movie.is_active = request.data.get('is_active')
+            movie.realease_year = request.data.get('realease_year')
+            movie.rating_imdb = request.data.get('rating_imdb')
+            movie.director_id = request.data.get('director_id')
+            movie.genres.set(request.data.get('genres'))
+            movie.save()
+            
+        return Response(data=MovieDetailSerializer(movie).data,
+                        status=status.HTTP_201_CREATED)
+    
+    elif request.method == "DELETE":
+        movie.delete()
+        movies = Movie.objects.all()
+        return Response(data=MovieListSerializer(movies).data,
+                        status=status.HTTP_204_NO_CONTENT)

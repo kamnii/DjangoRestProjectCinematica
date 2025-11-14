@@ -17,16 +17,16 @@ class DirectorSerializer(serializers.ModelSerializer):
 
 class MovieListSerializer(serializers.ModelSerializer):
     director = DirectorSerializer()
-    genre_list = serializers.SerializerMethodField()
+    genres_list = serializers.SerializerMethodField()
     reviews = ReviewSerializer(many=True)
 
     class Meta:
         model = Movie
-        fields = ['id', 'reviews', 'director', 'genre_list', 'title', 'realease_year', 'is_active']
+        fields = ['id', 'reviews', 'director', 'genres_list', 'title', 'realease_year', 'is_active']
         depth = 1
 
-    def get_genre_list(self, movie):
-        return [i.name for i in movie.genre.all()]
+    def get_genres_list(self, movie):
+        return [i.name for i in movie.genres.all()]
 
 
 class MovieDetailSerializer(serializers.ModelSerializer):
