@@ -25,10 +25,10 @@ class Genre(models.Model):
 
 class Movie(models.Model):
     director = models.ForeignKey(Director, on_delete=models.CASCADE, null=True)
-    genre = models.ManyToManyField(Genre, blank=True)
+    genres = models.ManyToManyField(Genre, null=True)
     title = models.CharField(max_length=255)
-    text = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    text = models.TextField(blank=True)
+    is_active = models.BooleanField(blank=True)
     realease_year = models.IntegerField()
     rating_imdb = models.FloatField()
     created = models.DateTimeField(auto_now_add=True)
